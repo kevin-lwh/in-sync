@@ -1,1 +1,1 @@
-# spotify-sync
+# in-sync
