@@ -22,8 +22,10 @@ var SpotifyWebApi = require('spotify-web-api-node');
 
 // Replace with your redirect URI, required scopes, and show_dialog preference
 var redirectUri = `http://localhost:8888/callback`;
-var scopes = ['user-top-read', 'user-read-playback-state'];
+var scopes = ['user-top-read', 'user-read-playback-state', 'user-modify-playback-state'];
 var showDialog = true;
+
+var accessToken; 
 
 // The API object we'll use to interact with the API
 var spotifyApi = new SpotifyWebApi({
@@ -41,13 +43,15 @@ app.get("/authorize", function (request, response) {
 // Exchange Authorization Code for an Access Token
 app.get("/callback", function (request, response) {
   var authorizationCode = request.query.code;
-  
+  console.log("test")
   spotifyApi.authorizationCodeGrant(authorizationCode)
   .then(function(data) {
     console.log(data)
+    accessToken = data.body['access_token']
     response.redirect(`/#access_token=${data.body['access_token']}&refresh_token=${data.body['refresh_token']}`)
   }, function(err) {
     console.log('Something went wrong when retrieving the access token!', err.message);
+    response.redirect('/');
   });
 });
 
@@ -57,8 +61,9 @@ app.get("/logout", function (request, response) {
 
 app.get('/myendpoint', function (request, response) {
   var loggedInSpotifyApi = new SpotifyWebApi();
-  console.log(request.headers['authorization'].split(' ')[1]);
-  loggedInSpotifyApi.setAccessToken(request.headers['authorization'].split(' ')[1]);
+  //console.log(request.headers['authorization'].split(' ')[1]);
+  //loggedInSpotifyApi.setAccessToken(request.headers['authorization'].split(' ')[1]);
+  loggedInSpotifyApi.setAccessToken(accessToken);
   // Search for a track!
   loggedInSpotifyApi.getMyTopTracks()
     .then(function(data) {
@@ -70,15 +75,30 @@ app.get('/myendpoint', function (request, response) {
   
 });
 
-app.get('/testendpoint', function (request, response) {
+
+app.get('/play', function (request, response) {
   var loggedInSpotifyApi = new SpotifyWebApi();
-  loggedInSpotifyApi.setAccessToken(request.headers['authorization'].split(' ')[1]);
-  loggedInSpotifyApi.getMyDevices()
-    .then(function(data) {
-      console.log(data.body);
-      response.send(data.body);
+  loggedInSpotifyApi.setAccessToken(accessToken);
+  loggedInSpotifyApi.play()
+    .then(function() {
+      console.log("playback started");
+      response.redirect('/');
     }, function(err) {
-      console.error(err);
+      console.log("playing error");
+      console.log(err);
+    });
+});
+
+app.get('/pause', function (request, response) {
+  var loggedInSpotifyApi = new SpotifyWebApi();
+  loggedInSpotifyApi.setAccessToken(accessToken);
+  loggedInSpotifyApi.pause()
+    .then(function() {
+      console.log("pause started");
+      response.redirect('/');
+    }, function(err) {
+      console.log("pause error");
+      console.log(err);
     });
 });
 
