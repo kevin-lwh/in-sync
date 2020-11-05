@@ -24,7 +24,8 @@ $(function() {
         }
         return initial;
       }, {});
-      window.location.hash = '';
+
+    window.location.hash = '';
     
     if (hash.access_token) {
       $.get({url: '/myendpoint', headers: {"Authorization": `Bearer ${hash.access_token}`}}, function(data) {
