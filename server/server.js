@@ -5,15 +5,6 @@
 var express = require('express');
 var app = express();
 
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
-
-// http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (request, response) {
-  response.sendFile(__dirname + '/views/index.html');
-});
-
-
 //-------------------------------------------------------------//
 
 
@@ -29,7 +20,7 @@ var accessToken;
 
 // The API object we'll use to interact with the API
 var spotifyApi = new SpotifyWebApi({
-  clientId : process.env.SPOTIFY_CLIENT_ID,
+  clientId : process.env.SPOTIFY_CLIENT_ID, 
   clientSecret : process.env.SPOTIFY_CLIENT_SECRET,
   redirectUri : redirectUri
 });
@@ -43,15 +34,12 @@ app.get("/authorize", function (request, response) {
 // Exchange Authorization Code for an Access Token
 app.get("/callback", function (request, response) {
   var authorizationCode = request.query.code;
-  console.log("test")
   spotifyApi.authorizationCodeGrant(authorizationCode)
   .then(function(data) {
-    console.log(data)
     accessToken = data.body['access_token']
-    response.redirect(`/#access_token=${data.body['access_token']}&refresh_token=${data.body['refresh_token']}`)
+    response.send(`/#access_token=${data.body['access_token']}&refresh_token=${data.body['refresh_token']}`)
   }, function(err) {
     console.log('Something went wrong when retrieving the access token!', err.message);
-    response.redirect('/');
   });
 });
 
@@ -67,7 +55,7 @@ app.get('/myendpoint', function (request, response) {
   // Search for a track!
   loggedInSpotifyApi.getMyTopTracks()
     .then(function(data) {
-      //console.log(data.body);
+      console.log(data.body);
       response.send(data.body);
     }, function(err) {
       console.error(err);
@@ -76,30 +64,8 @@ app.get('/myendpoint', function (request, response) {
 });
 
 
-app.get('/play', function (request, response) {
-  var loggedInSpotifyApi = new SpotifyWebApi();
-  loggedInSpotifyApi.setAccessToken(accessToken);
-  loggedInSpotifyApi.play()
-    .then(function() {
-      console.log("playback started");
-      response.redirect('/');
-    }, function(err) {
-      console.log("playing error");
-      console.log(err);
-    });
-});
-
-app.get('/pause', function (request, response) {
-  var loggedInSpotifyApi = new SpotifyWebApi();
-  loggedInSpotifyApi.setAccessToken(accessToken);
-  loggedInSpotifyApi.pause()
-    .then(function() {
-      console.log("pause started");
-      response.redirect('/');
-    }, function(err) {
-      console.log("pause error");
-      console.log(err);
-    });
+app.get('/test', function (req, res) {
+    res.send("hello world.");
 });
 
 
@@ -107,6 +73,6 @@ app.get('/pause', function (request, response) {
 
 
 // listen for requests :)
-var listener = app.listen(8888, function () {
+var listener = app.listen(8080, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });

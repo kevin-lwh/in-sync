@@ -1,0 +1,16 @@
+{
+  "name": "my-app-backend",
+  "version": "0.0.1",
+  "description": "What am I about?",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.15.3",
+    "spotify-web-api-node": "^2.5.0"
+  },
+  "engines": {
+    "node": "8.x"
+  }
+}

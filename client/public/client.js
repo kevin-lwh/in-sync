@@ -28,19 +28,16 @@ $(function() {
     window.location.hash = '';
     
     if (hash.access_token) {
-      $.get({url: '/myendpoint', headers: {"Authorization": `Bearer ${hash.access_token}`}}, function(data) {
+      $.get({url: '/test', headers: {"Authorization": `Bearer ${hash.access_token}`}}, function(data) {
         // "Data" is the array of track objects we get from the API. See server.js for the function that returns it.
         console.log(data)
   
-        var title = $('<h3>Your top tracks on Spotify:</h3>');
+        var title = $('<h3>calling backend /test: </h3>');
         title.prependTo('#data-container');
+        var testData = $('<p></p>');
+        testData.text(data);
+        testData.appendTo('#data-container ol')
   
-        // For each of the tracks, create an element
-        data.items.forEach(function(track) {
-          var trackDiv = $('<li class="track"></li>');
-          trackDiv.text(track.name);
-          trackDiv.appendTo('#data-container ol');
-        });
   
       });
     }
