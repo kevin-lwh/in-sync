@@ -3,6 +3,7 @@
 
 // init project
 var express = require('express');
+var url = require('url');
 var app = express();
 
 //-------------------------------------------------------------//
@@ -61,6 +62,17 @@ app.get('/myendpoint', function (request, response) {
       console.error(err);
     });
   
+});
+
+app.get("/play", function(request, response) {
+  var loggedInSpotifyApi = new SpotifyWebApi();
+  loggedInSpotifyApi.setAccessToken(accessToken);
+  loggedInSpotifyApi.play()
+    .then(function() {
+      console.log("playing started")
+    }, function(err) {
+      console.log("playing went wrong")
+    });
 });
 
 

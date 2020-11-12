@@ -3,6 +3,7 @@
 
 // init project
 const http = require('http');
+const url = require('url');
 var express = require('express');
 var app = express();
 
@@ -14,7 +15,7 @@ app.get("/", function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
 });
 
-
+ 
 //-------------------------------------------------------------//
 
 
@@ -38,104 +39,87 @@ var spotifyApi = new SpotifyWebApi({
 
 // call backend /authorize to create an authorize url
 app.get("/authorize", function (request, response) {
-
-  var authorizeURL;
-  const options = {
-    hostname: process.env.BACKEND_HOST,
-    port: 8080,
-    path: '/authorize',
-    method: 'GET'
-  }
-  const req = http.request(options, res => {
-    console.log(`statusCode: ${res.statusCode}`)
-
-    res.on('data', d => {
-      console.log(d.toString());
-      authorizeURL = d.toString();
-      response.send(authorizeURL);
-    })
-  })
-  req.on('error', err => {
-    console.error(err)
-  })
-  req.end()
- 
+  var authorizeURL = spotifyApi.createAuthorizeURL(scopes, null, showDialog);
+  console.log(authorizeURL)
+  response.send(authorizeURL);
 });
 
 // call backend /callback to exchange authorization code for an access token
 app.get("/callback", function (request, response) {
   var authorizationCode = request.query.code;
-  const options = {
-    hostname: process.env.BACKEND_HOST,
-    port: 8080,
-    path: '/callback?code=' + authorizationCode,
-    method: 'GET'
-  }
-  const req = http.request(options, res => {
-    console.log(`statusCode: ${res.statusCode}`)
+  spotifyApi.authorizationCodeGrant(authorizationCode)
+  .then(function(data) {
+    accessToken = data.body['access_token']
+    response.redirect(`/#access_token=${data.body['access_token']}&refresh_token=${data.body['refresh_token']}`)
+  }, function(err) {
+    console.log('Something went wrong when retrieving the access token!', err.message);
+  });
+});
 
-    res.on('data', d => {
-      var hash = d.toString();
-      console.log(hash);
-      response.redirect(hash);
-    })
-  })
-  req.on('error', err => {
-    console.error(err)
-  })
-  req.end()
-  
+// get home page html
+app.get("/home", function (request, response) {
+  response.sendFile(__dirname + '/views/home.html');
+});
+
+// get room page html
+app.get("/room", function (request, response) {
+  const queryObject = url.parse(request.url, true).query;
+  console.log(queryObject);
+  response.sendFile(__dirname + '/views/room.html')
 });
 
 app.get("/logout", function (request, response) {
   response.redirect('/'); 
 });
 
+app.get('/create-room', function (request, response) {
+  var roomCode = Math.floor(100000 + Math.random() * 900000);
+  response.send(roomCode.toString());
+});
+
 app.get('/myendpoint', function (request, response) {
 
-  const options = {
-    hostname: process.env.BACKEND_HOST,
-    port: 8080,
-    path: '/myendpoint',
-    method: 'GET'
-  }
-  const req = http.request(options, res => {
-    console.log(`statusCode: ${res.statusCode}`)
-
-    res.on('data', d => {
-      var json = d.toJSON();
-      console.log(json);
-      response.send(json);
-    })
-  })
-  req.on('error', err => {
-    console.error(err)
-  })
-  req.end()
+  var loggedInSpotifyApi = new SpotifyWebApi();
+  //console.log(request.headers['authorization'].split(' ')[1]);
+  //loggedInSpotifyApi.setAccessToken(request.headers['authorization'].split(' ')[1]);
+  loggedInSpotifyApi.setAccessToken(accessToken);
+  // Search for a track!
+  loggedInSpotifyApi.getMyTopTracks()
+    .then(function(data) {
+      console.log(data.body);
+      response.send(data.body);
+    }, function(err) {
+      console.error(err);
+    });
   
 });
 
 app.get('/test', function (request, response) {
-  const options = {
-    hostname: process.env.BACKEND_HOST,
-    port: 8080,
-    path: '/test',
-    method: 'GET'
-  }
-  const req = http.request(options, res => {
-    console.log(`statusCode: ${res.statusCode}`)
-
-    res.on('data', d => {
-      console.log(d.toString());
-      response.send(d.toString())
-    })
-  })
-  
-  req.on('error', err => {
-    console.error(err)
-  })
-  req.end()
+  response.send("hello world");
 });
+
+app.get("/play", function(request, response) {
+  var loggedInSpotifyApi = new SpotifyWebApi();
+  loggedInSpotifyApi.setAccessToken(accessToken);
+  loggedInSpotifyApi.play()
+    .then(function() {
+      console.log("playing")
+    }, function(err) {
+      console.log("playing went wrong")
+    });
+});
+
+app.get("/pause", function(request, response) {
+  var loggedInSpotifyApi = new SpotifyWebApi();
+  loggedInSpotifyApi.setAccessToken(accessToken);
+  loggedInSpotifyApi.pause()
+    .then(function() {
+      console.log("pausing")
+    }, function(err) {
+      console.log("pausing went wrong")
+    });
+});
+
 
 
 //-------------------------------------------------------------//

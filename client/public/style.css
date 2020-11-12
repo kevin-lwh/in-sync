@@ -21,4 +21,16 @@
   .nicejob {
     text-decoration: line-through;
   }
+
+  .logoutBtn {
+    position: absolute;
+    top: 80px;
+    right: 50px;
+  }
+
+  .leaveRoomBtn {
+    position: absolute;
+    top: 140px;
+    right: 50px;
+  }
   
