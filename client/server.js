@@ -4,6 +4,7 @@
 // init project
 const http = require('http');
 const url = require('url');
+const { v4: uuidv4 } = require('uuid');
 var express = require('express');
 var app = express();
 
@@ -50,6 +51,8 @@ app.get("/callback", function (request, response) {
   spotifyApi.authorizationCodeGrant(authorizationCode)
   .then(function(data) {
     accessToken = data.body['access_token']
+    var userUuid = uuidv4();
+    console.log(userUuid);
     response.redirect(`/#access_token=${data.body['access_token']}&refresh_token=${data.body['refresh_token']}`)
   }, function(err) {
     console.log('Something went wrong when retrieving the access token!', err.message);

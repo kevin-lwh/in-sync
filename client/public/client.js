@@ -48,8 +48,6 @@ $(function() {
     }
 
     $('#test').click(function() {
-      console.log(accessToken);
-      console.log(refreshToken);
       // Call the authorize endpoint, which will return an authorize URL, then redirect to that URL
       $.get('/test', function(data) {
         var title = $('<h3>calling backend /test: </h3>');
