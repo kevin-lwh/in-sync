@@ -33,4 +33,14 @@
     top: 140px;
     right: 50px;
   }
+
+  .create-section {
+    width: 50%;
+    float: left;
+  }
+
+  .join-section {
+    width: 50%;
+    float: right;
+  }
   

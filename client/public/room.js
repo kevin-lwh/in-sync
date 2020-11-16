@@ -6,6 +6,9 @@
 
 $(function() {
 
+    // add room code text
+    $('#room-code').text('room code: ' + window.localStorage.getItem("roomCode"));
+
     $('#syncPlay').click(function() {
         // Call the authorize endpoint, which will return an authorize URL, then redirect to that URL
         $.get('/test', function(data) {

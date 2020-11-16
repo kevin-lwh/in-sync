@@ -21,7 +21,7 @@ $(function() {
     $('#create').click(function() {
         var body = {"userUuid": window.localStorage.getItem("userUuid")}
         $.post({url: '/create-room', data: body}, function(data) {
-            console.log(data);
+            window.localStorage.setItem("roomCode", data);
             window.location="/room?code=" + data;
         });
       
@@ -30,9 +30,9 @@ $(function() {
     $('#join').submit(function(event) {
         event.preventDefault();
         var roomCode = $("input").first().val();
-        console.log(roomCode);
         var body = {"userUuid": window.localStorage.getItem("userUuid"), "roomCode" : roomCode}
         $.post({url: '/join-room', data: body}, function(data) {
+            window.localStorage.setItem("roomCode", data);
             window.location = "/room?code=" + data;
         }).error(function() {
             alert("room does not exist")
