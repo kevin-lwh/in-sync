@@ -30,7 +30,7 @@ $(function() {
     $('#join').submit(function(event) {
         event.preventDefault();
         var roomCode = $("input").first().val();
-        var body = {"userUuid": window.localStorage.getItem("userUuid"), "roomCode" : roomCode}
+        var body = {"userUuid": window.localStorage.getItem("userUuid"), "roomCode": roomCode}
         $.post({url: '/join-room', data: body}, function(data) {
             window.localStorage.setItem("roomCode", data);
             window.location = "/room?code=" + data;

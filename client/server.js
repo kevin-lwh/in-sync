@@ -88,6 +88,7 @@ app.get("/logout", function (request, response) {
 app.post('/create-room', urlencodedParser, function (request, response) {
   var roomCode = Math.floor(100000 + Math.random() * 900000);
   roomMap.set(roomCode.toString(), [request.body.userUuid]);
+  console.log(roomMap)
   response.send(roomCode.toString());
 });
 
@@ -97,8 +98,28 @@ app.post('/join-room', urlencodedParser, function (request, response) {
     var userUuids = roomMap.get(roomCode);
     userUuids.push(request.body.userUuid);
     roomMap.set(roomCode, userUuids);
+    console.log(roomMap)
     response.send(roomCode);
   } else {
+    response.sendStatus(400);
+  }
+});
+
+app.post('/leave-room', urlencodedParser, function (request, response) {
+  var roomCode = request.body.roomCode;
+  var userUuid = request.body.userUuid;
+  if (userMap.has(userUuid)) {
+    var userUuids = roomMap.get(roomCode)
+    for (var uuid of userUuids) {
+      if (uuid == userUuid) {
+        var index = userUuids.indexOf(uuid);
+        userUuids.splice(index, 1);
+      }
+    }
+    roomMap.set(roomCode, userUuids);
+    console.log(roomMap)
+    response.sendStatus(200);
+  } else {  
     response.sendStatus(400);
   }
 });

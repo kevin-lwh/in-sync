@@ -35,7 +35,12 @@ $(function() {
     });
 
     $('#leaveRoom').click(function() {
-        window.location="/home";
+        var body = {"userUuid": window.localStorage.getItem("userUuid"), "roomCode" : window.localStorage.getItem("roomCode")}
+        $.post('/leave-room', body, function(data) {
+            window.location="/home";
+        }).error(function(){
+            alert("leave room error")
+        });
     });
   
   });
