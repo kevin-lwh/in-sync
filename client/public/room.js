@@ -1,0 +1,38 @@
+// client-side js
+// run by the browser each time your view template is loaded
+
+// by default, you've got jQuery,
+// add other scripts at the bottom of index.html
+
+$(function() {
+
+    $('#syncPlay').click(function() {
+        // Call the authorize endpoint, which will return an authorize URL, then redirect to that URL
+        $.get('/test', function(data) {
+            var title = $('<h3>calling backend /test: </h3>');
+            title.prependTo('#data-container');
+            var testData = $('<p></p>');
+            testData.text(data);
+            testData.appendTo('#data-container ol')
+        });
+    });
+
+    $('#play').click(function() {
+        var body = {"userUuid": window.localStorage.getItem("userUuid")}
+        $.post('/play', body, function(data){}).error(function(){
+        alert("playing failed")
+        });
+    });
+
+    $('#pause').click(function() {
+        var body = {"userUuid": window.localStorage.getItem("userUuid")}
+        $.post('/pause', body, function(data){}).error(function(){
+            alert("pausing failed")
+        });
+    });
+
+    $('#leaveRoom').click(function() {
+        window.location="/home";
+    });
+  
+  });
