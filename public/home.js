@@ -38,5 +38,14 @@ $(function() {
             alert("room does not exist")
         });
     });
+
+    $('#logout').click(function() {
+        var body = {"userUuid": window.localStorage.getItem("userUuid"), "roomCode": ""}
+        $.post({url: '/logout', data: body}, function(data) {
+            window.location = '/';
+        }).error(function(){
+            alert("logout failed");
+        });
+    });
   
   });

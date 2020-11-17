@@ -81,14 +81,42 @@ app.get("/room", function (request, response) {
   response.sendFile(__dirname + '/views/room.html')
 });
 
-app.get("/logout", function (request, response) {
-  response.redirect('/'); 
+app.post("/logout", urlencodedParser, function (request, response) {
+  var roomCode = request.body.roomCode;
+  var userUuid = request.body.userUuid;
+  // if user logs out in a room, remove from room first
+  if (roomCode != "") {
+    if (userMap.has(userUuid)) {
+      //remove from room first
+      var userUuids = roomMap.get(roomCode)
+      for (var uuid of userUuids) {
+        if (uuid == userUuid) {
+          var index = userUuids.indexOf(uuid);
+          userUuids.splice(index, 1);
+        }
+      }
+      // if room is empty, remove the room
+      if (userUuids.length == 0) {
+        roomMap.delete(roomCode)
+      } else {
+        roomMap.set(roomCode, userUuids);
+      }
+    } else {
+      response.sendStatus(400);
+    }
+  }
+  // remove from user map
+  if (userMap.has(userUuid)) {
+    userMap.delete(userUuid)
+    response.sendStatus(200)
+  } else {
+    response.sendStatus(400);
+  }
 });
 
 app.post('/create-room', urlencodedParser, function (request, response) {
   var roomCode = Math.floor(100000 + Math.random() * 900000);
   roomMap.set(roomCode.toString(), [request.body.userUuid]);
-  console.log(roomMap)
   response.send(roomCode.toString());
 });
 
@@ -98,7 +126,6 @@ app.post('/join-room', urlencodedParser, function (request, response) {
     var userUuids = roomMap.get(roomCode);
     userUuids.push(request.body.userUuid);
     roomMap.set(roomCode, userUuids);
-    console.log(roomMap)
     response.send(roomCode);
   } else {
     response.sendStatus(400);
@@ -116,29 +143,16 @@ app.post('/leave-room', urlencodedParser, function (request, response) {
         userUuids.splice(index, 1);
       }
     }
-    roomMap.set(roomCode, userUuids);
-    console.log(roomMap)
+    // if room is empty, remove the room
+    if (userUuids.length == 0) {
+      roomMap.delete(roomCode)
+    } else {
+      roomMap.set(roomCode, userUuids);
+    }
     response.sendStatus(200);
   } else {  
     response.sendStatus(400);
   }
-});
-
-app.get('/myendpoint', function (request, response) {
-
-  var loggedInSpotifyApi = new SpotifyWebApi();
-  //console.log(request.headers['authorization'].split(' ')[1]);
-  //loggedInSpotifyApi.setAccessToken(request.headers['authorization'].split(' ')[1]);
-  loggedInSpotifyApi.setAccessToken(accessToken);
-  // Search for a track!
-  loggedInSpotifyApi.getMyTopTracks()
-    .then(function(data) {
-      console.log(data.body);
-      response.send(data.body);
-    }, function(err) {
-      console.error(err);
-    });
-  
 });
 
 app.get('/test', function (request, response) {
