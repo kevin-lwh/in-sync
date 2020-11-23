@@ -24,11 +24,35 @@
     <main>
       <a class="btn btn-secondary logoutBtn" id="logout">Logout</a>
       <a class="btn btn-secondary leaveRoomBtn" id="leaveRoom">Leave Room</a>
-      <div>
-        <a class="btn btn-primary" id="syncPlay">Sync Play</a>
-        <a class="btn btn-primary" id="play">Play</a>
-        <a class="btn btn-primary" id="pause">Pause</a>
+      <div class="room-function-section">
+        <div>
+          <p class="text-justify"> Sync all room members' Spotify devices</p>
+          <a class="btn btn-primary sync-button" id="syncPlay">Sync Play</a>
+        </div>
+        <div>
+          <a class="btn btn-primary sync-button" id="syncPause">Sync Pause</a>
+        </div>
+        <div class="test-button">
+          <a class="btn btn-primary" id="play">Test Play</a>
+          <a class="btn btn-primary" id="pause">Test Pause</a>
+        </div>
+        <div>
+          
+        </div>
       </div>
+      
+      <div class="room-info">
+        <div>
+          <h3 class="user-list-title">Room Members:</h3> 
+          <a class="btn btn-secondary refresh-button" id="refreshRoom">Refresh</a>
+        </div>
+        <div class="user-list-section" id="roomUsers">
+          <ul class="list-group" id="userList">
+  
+          </ul>
+        </div>
+      </div>
+      
       
       <div id="data-container">
         <ol>

@@ -9,6 +9,18 @@ $(function() {
     // add room code text
     $('#room-code').text('room code: ' + window.localStorage.getItem("roomCode"));
 
+    // add users in room
+    $.post({url: '/get-room-users', data: {"roomCode": window.localStorage.getItem("roomCode")}}, function(data) {
+        var userNames = data['users'];
+        for (var name of userNames) {
+            var nameField = $('<li class="list-group-item"></li>');
+            nameField.text(name);
+            nameField.appendTo('#roomUsers ul')
+        }
+    }).error(function(){
+        alert("get users list failed");
+    });
+
     $('#syncPlay').click(function() {
         // Call the authorize endpoint, which will return an authorize URL, then redirect to that URL
         $.get('/test', function(data) {
@@ -49,6 +61,20 @@ $(function() {
             window.location = '/';
         }).error(function(){
             alert("logout failed");
+        });
+    });
+
+    $('#refreshRoom').click(function() {
+        $('#userList').empty();
+        $.post({url: '/get-room-users', data: {"roomCode": window.localStorage.getItem("roomCode")}}, function(data) {
+            var userNames = data['users'];
+            for (var name of userNames) {
+                var nameField = $('<li class="list-group-item"></li>');
+                nameField.text(name);
+                nameField.appendTo('#roomUsers ul')
+            }
+        }).error(function(){
+            alert("get users list failed");
         });
     });
   

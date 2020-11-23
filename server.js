@@ -188,9 +188,42 @@ app.post("/pause", urlencodedParser, function(request, response) {
         console.log("pausing went wrong")
       });
   }
-  
+
 });
 
+app.post("/get-room-users", urlencodedParser, async function(request, response) {
+  var roomCode = request.body.roomCode;
+  var resData = {
+    users: []
+};
+  if (roomMap.has(roomCode)) {
+    var users = roomMap.get(roomCode)
+    var names = []
+    for (var userUuid of users) {
+      var name = await getUserName(userUuid)
+      names.push(name)
+    }
+    resData.users = names;
+    response.send(resData);
+  } else {
+    response.sendStatus(400);
+  }
+});
+
+async function getUserName(userUuid) {
+  return new Promise(function(resolve, reject) {
+    // get access token for the user
+    var accessToken = userMap.get(userUuid)['access_token'];
+    var loggedInSpotifyApi = new SpotifyWebApi();
+    loggedInSpotifyApi.setAccessToken(accessToken);
+    loggedInSpotifyApi.getMe()
+      .then(function(data){
+        resolve(data.body['display_name'])
+      }, function(err) {
+        console.log("get me went wrong")
+      });
+  })
+}
 
 
 //-------------------------------------------------------------//

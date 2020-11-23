@@ -43,4 +43,40 @@
     width: 50%;
     float: right;
   }
+
+  .user-list-section {
+    margin-top: 10px;
+    width: 50%;
+    float: left;
+  }
+
+  .room-function-section {
+    width: 50%;
+    float: right;
+  }
   
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .user-list-title {
+    display: inline;
+  }
+
+  .room-info {
+    width: 30%;
+    margin-top: 50px;
+  }
+
+  .refresh-button {
+    float: right;
+  }
+
+  .sync-button {
+    margin-top: 10px;
+  }
+
+  .test-button {
+    margin-top: 10px;
+  }
