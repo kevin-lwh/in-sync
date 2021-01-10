@@ -117,6 +117,8 @@ app.post("/logout", urlencodedParser, function (request, response) {
 app.post('/create-room', urlencodedParser, function (request, response) {
   var roomCode = Math.floor(100000 + Math.random() * 900000);
   roomMap.set(roomCode.toString(), [request.body.userUuid]);
+  console.log(roomMap);
+  console.log(userMap);
   response.send(roomCode.toString());
 });
 
@@ -155,41 +157,104 @@ app.post('/leave-room', urlencodedParser, function (request, response) {
   }
 });
 
-app.get('/test', function (request, response) {
-  response.send("hello world");
-});
-
-app.post("/play", urlencodedParser, function(request, response) {
+app.post('/sync-play', urlencodedParser, function (request, response) {
   var userUuid = request.body.userUuid;
   if (userMap.has(userUuid)) {
     var loggedInSpotifyApi = new SpotifyWebApi();
     loggedInSpotifyApi.setAccessToken(userMap.get(userUuid)['access_token']);
-    loggedInSpotifyApi.play()
-      .then(function() {
-        console.log("playing")
+    loggedInSpotifyApi.getMyCurrentPlayingTrack()
+      .then(function(data) {
+        console.log(data);
+        response.send(data.body.progress_ms.toString());
       }, function(err) {
-        console.log("playing went wrong")
+        console.log('failed to sync play')
       });
   } else {
     response.sendStatus(400);
   }
- 
+});
+
+app.post('/seek-to', urlencodedParser, function (request, response) {
+  console.log("seek-to")
+  var roomCode = request.body.roomCode;
+  var postionMS = request.body.positionMS;
+  var users = roomMap.get(roomCode)
+  for (var userUuid of users) {
+    var accessToken = userMap.get(userUuid)['access_token'];
+    var loggedInSpotifyApi = new SpotifyWebApi();
+    loggedInSpotifyApi.setAccessToken(accessToken);
+    loggedInSpotifyApi.seek(Number("10000"))
+      .then(function(data) {
+        console.log('seek success');
+      }, function(err) {
+        console.log('failed to seek')
+      })
+  }
+})
+
+app.post("/play", urlencodedParser, function(request, response) {
+  var roomCode = request.body.roomCode;
+  var users = roomMap.get(roomCode)
+  for (var userUuid of users) {
+    var accessToken = userMap.get(userUuid)['access_token'];
+    var loggedInSpotifyApi = new SpotifyWebApi();
+    loggedInSpotifyApi.setAccessToken(accessToken);
+    loggedInSpotifyApi.play()
+      .then(function() {
+        console.log("playing")
+      }, function(err) {
+        console.log("playing went wrong, userUuid = " + userUuid)
+      });
+  }
 });
 
 app.post("/pause", urlencodedParser, function(request, response) {
-  var userUuid = request.body.userUuid;
-  if (userMap.has(userUuid)) {
+  var roomCode = request.body.roomCode;
+  var users = roomMap.get(roomCode)
+  for (var userUuid of users) {
+    var accessToken = userMap.get(userUuid)['access_token'];
     var loggedInSpotifyApi = new SpotifyWebApi();
-    loggedInSpotifyApi.setAccessToken(userMap.get(userUuid)['access_token']);
+    loggedInSpotifyApi.setAccessToken(accessToken);
     loggedInSpotifyApi.pause()
       .then(function() {
-        console.log("pausing")
+        console.log("pausing playback")
       }, function(err) {
-        console.log("pausing went wrong")
+        console.log("pausing went wrong, userUuid = " + userUuid)
       });
   }
-
 });
+
+app.post("/next-track", urlencodedParser, function(request, response) {
+  var roomCode = request.body.roomCode;
+  var users = roomMap.get(roomCode);
+  for (var userUuid of users) {
+    var accessToken = userMap.get(userUuid)['access_token'];
+    var loggedInSpotifyApi = new SpotifyWebApi();
+    loggedInSpotifyApi.setAccessToken(accessToken);
+    loggedInSpotifyApi.skipToNext()
+    .then(function(data) {
+      console.log('skip to next track');
+    }, function(err) {
+      console.log('failed to skip to next track, userUuid = ' + userUuid)
+    });
+  }
+})
+
+app.post("/previous-track", urlencodedParser, function(request, response) {
+  var roomCode = request.body.roomCode;
+  var users = roomMap.get(roomCode);
+  for (var userUuid of users) {
+    var accessToken = userMap.get(userUuid)['access_token'];
+    var loggedInSpotifyApi = new SpotifyWebApi();
+    loggedInSpotifyApi.setAccessToken(accessToken);
+    loggedInSpotifyApi.skipToPrevious()
+    .then(function(data) {
+      console.log('skip to previous track');
+    }, function(err) {
+      console.log('failed to skip to previous track, userUuid = ' + userUuid)
+    });
+  }
+})
 
 app.post("/get-room-users", urlencodedParser, async function(request, response) {
   var roomCode = request.body.roomCode;
